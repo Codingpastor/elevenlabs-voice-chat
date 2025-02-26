@@ -93,6 +93,38 @@
                 font-weight: bold;
                 margin-left: 10px;
             }
+            
+            .timer {
+                font-size: 24px;
+                font-weight: bold;
+                text-align: center;
+                margin-bottom: 20px;
+                color: var(--primary-color);
+            }
+            
+            .thinking-indicator {
+                display: none;
+                text-align: center;
+                margin: 10px 0;
+                font-style: italic;
+                color: var(--secondary-color);
+                position: relative;
+            }
+            
+            .thinking-indicator::after {
+                content: "...";
+                position: absolute;
+                width: 20px;
+                text-align: left;
+                animation: thinking 1.5s infinite;
+            }
+            
+            @keyframes thinking {
+                0% { content: "."; }
+                33% { content: ".."; }
+                66% { content: "..."; }
+                100% { content: "."; }
+            }
 
             .indicator-dot {
                 width: 12px;
@@ -262,6 +294,8 @@
             
             <div class="main-content">
                 <div class="control-panel">
+                    <div class="timer" id="conversationTimer">00:00</div>
+                    
                     <div class="status-section">
                         <div class="status-title">Connection Status</div>
                         <div class="status-indicator">
@@ -273,6 +307,10 @@
                             <span class="status-label">Agent Status:</span>
                             <span class="status-value" id="agentStatus">Waiting</span>
                         </div>
+                    </div>
+                    
+                    <div class="thinking-indicator" id="thinkingIndicator">
+                        AI is thinking
                     </div>
                     
                     <div class="voice-activity" id="voiceActivity">

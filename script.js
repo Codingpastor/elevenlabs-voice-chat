@@ -12,6 +12,8 @@ const activityBars = document.getElementById('activityBars');
 const errorToast = document.getElementById('errorToast');
 const primaryColorPicker = document.getElementById('primaryColor');
 const secondaryColorPicker = document.getElementById('secondaryColor');
+const conversationTimer = document.getElementById('conversationTimer');
+const thinkingIndicator = document.getElementById('thinkingIndicator');
 
 // Conversation object to manage the session
 let conversation;
@@ -23,6 +25,11 @@ let isRetrying = false;
 let retryCount = 0;
 const MAX_RETRIES = 3;
 let retryTimeout;
+
+// Timer variables
+let timerInterval;
+let startTime;
+let isTimerRunning = false;
 
 // Chat history tracking (kept internally but not displayed)
 const chatMessages = [];
@@ -227,6 +234,42 @@ function lightenColor(color, percent) {
  * Start a conversation with the ElevenLabs agent
  * This example uses direct agent ID authentication (for public agents)
  */
+/**
+ * Start and update the conversation timer
+ */
+function startTimer() {
+    // Reset and start the timer
+    startTime = new Date();
+    isTimerRunning = true;
+    
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        if (!isTimerRunning) return;
+        
+        const currentTime = new Date();
+        const elapsedTime = new Date(currentTime - startTime);
+        const minutes = String(elapsedTime.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(elapsedTime.getUTCSeconds()).padStart(2, '0');
+        
+        conversationTimer.textContent = `${minutes}:${seconds}`;
+    }, 1000);
+}
+
+/**
+ * Stop the conversation timer
+ */
+function stopTimer() {
+    isTimerRunning = false;
+    clearInterval(timerInterval);
+}
+
+/**
+ * Reset the timer display
+ */
+function resetTimer() {
+    conversationTimer.textContent = '00:00';
+}
+
 async function startConversation() {
     try {
         updateConnectionStatus('Connecting...');
@@ -234,6 +277,9 @@ async function startConversation() {
         
         // Set up audio analyzer for microphone visualization
         await setupAudioAnalyzer();
+        
+        // Start the timer
+        startTimer();
         
         // Start the conversation
         conversation = await Conversation.startSession({
@@ -271,7 +317,16 @@ async function startConversation() {
                 }
             },
             onModeChange: (mode) => {
-                agentStatus.textContent = mode.mode === 'speaking' ? 'Speaking' : 'Listening';
+                const currentMode = mode.mode;
+                agentStatus.textContent = currentMode === 'speaking' ? 'Speaking' : 'Listening';
+                
+                // Show thinking indicator when in processing mode
+                if (currentMode === 'processing') {
+                    thinkingIndicator.style.display = 'block';
+                    agentStatus.textContent = 'Processing';
+                } else {
+                    thinkingIndicator.style.display = 'none';
+                }
             },
             onNewMessage: (message) => {
                 // Track AI message internally but don't display
@@ -338,6 +393,12 @@ async function stopConversation() {
                 clearTimeout(retryTimeout);
             }
             
+            // Stop the timer
+            stopTimer();
+            
+            // Hide thinking indicator if visible
+            thinkingIndicator.style.display = 'none';
+            
             updateConnectionStatus('Disconnected');
             updateButtonState(false);
             agentStatus.textContent = 'Waiting';
@@ -367,6 +428,9 @@ async function retryConnection() {
             conversation = null;
         }
     }
+    
+    // Reset timer before starting a new connection
+    resetTimer();
     
     // Start new connection
     startConversation();

@@ -30,7 +30,7 @@
 
             .app-container {
                 display: grid;
-                grid-template-rows: auto 1fr auto;
+                grid-template-rows: auto 1fr;
                 gap: 20px;
                 height: 90vh;
             }
@@ -50,65 +50,9 @@
             }
 
             .main-content {
-                display: grid;
-                grid-template-columns: 2fr 1fr;
-                gap: 20px;
-                height: 100%;
-            }
-
-            .chat-container {
-                background-color: white;
-                border-radius: 10px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                padding: 20px;
                 display: flex;
-                flex-direction: column;
+                justify-content: center;
                 height: 100%;
-            }
-
-            .chat-history {
-                flex-grow: 1;
-                overflow-y: auto;
-                padding: 10px;
-                margin-bottom: 15px;
-                background-color: var(--light-gray);
-                border-radius: 8px;
-            }
-
-            .message {
-                margin-bottom: 15px;
-                padding: 12px;
-                border-radius: 8px;
-                max-width: 80%;
-                word-wrap: break-word;
-                position: relative;
-                animation: fadeIn 0.3s ease-in-out;
-            }
-
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-
-            .user-message {
-                background-color: var(--user-message-color);
-                margin-left: auto;
-                border-bottom-right-radius: 0;
-                border-left: 3px solid var(--primary-color);
-            }
-
-            .ai-message {
-                background-color: var(--ai-message-color);
-                margin-right: auto;
-                border-bottom-left-radius: 0;
-                border-right: 3px solid var(--secondary-color);
-            }
-
-            .message-timestamp {
-                font-size: 11px;
-                color: #6c757d;
-                text-align: right;
-                margin-top: 5px;
             }
 
             .control-panel {
@@ -116,6 +60,8 @@
                 border-radius: 10px;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                 padding: 20px;
+                width: 100%;
+                max-width: 400px;
                 height: 100%;
                 display: flex;
                 flex-direction: column;
@@ -298,15 +244,11 @@
             }
 
             @media (max-width: 768px) {
-                .main-content {
-                    grid-template-columns: 1fr;
-                }
-                
                 .app-container {
                     height: auto;
                 }
                 
-                .chat-container, .control-panel {
+                .control-panel {
                     height: 400px;
                 }
             }
@@ -319,12 +261,6 @@
             </div>
             
             <div class="main-content">
-                <div class="chat-container">
-                    <div class="chat-history" id="chatHistory">
-                        <!-- Chat messages will appear here -->
-                    </div>
-                </div>
-                
                 <div class="control-panel">
                     <div class="status-section">
                         <div class="status-title">Connection Status</div>

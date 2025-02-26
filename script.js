@@ -7,7 +7,6 @@ const retryButton = document.getElementById('retryButton');
 const connectionStatus = document.getElementById('connectionStatus');
 const connectionDot = document.getElementById('connectionDot');
 const agentStatus = document.getElementById('agentStatus');
-const chatHistory = document.getElementById('chatHistory');
 const voiceActivity = document.getElementById('voiceActivity');
 const activityBars = document.getElementById('activityBars');
 const errorToast = document.getElementById('errorToast');
@@ -25,7 +24,7 @@ let retryCount = 0;
 const MAX_RETRIES = 3;
 let retryTimeout;
 
-// Chat history tracking
+// Chat history tracking (kept internally but not displayed)
 const chatMessages = [];
 
 /**
@@ -106,11 +105,11 @@ function visualizeMicrophone() {
 }
 
 /**
- * Add a message to the chat history
+ * Track message in internal array but don't display it visually
  * @param {string} text - Message content
  * @param {string} sender - 'user' or 'ai'
  */
-function addChatMessage(text, sender) {
+function trackChatMessage(text, sender) {
     // Create message object
     const message = {
         text,
@@ -121,25 +120,8 @@ function addChatMessage(text, sender) {
     // Add to message array
     chatMessages.push(message);
     
-    // Create message element
-    const messageEl = document.createElement('div');
-    messageEl.classList.add('message');
-    messageEl.classList.add(sender === 'user' ? 'user-message' : 'ai-message');
-    
-    // Add message content
-    messageEl.textContent = text;
-    
-    // Add timestamp
-    const timestampEl = document.createElement('div');
-    timestampEl.classList.add('message-timestamp');
-    timestampEl.textContent = formatTime(message.timestamp);
-    messageEl.appendChild(timestampEl);
-    
-    // Add to chat history
-    chatHistory.appendChild(messageEl);
-    
-    // Scroll to bottom
-    chatHistory.scrollTop = chatHistory.scrollHeight;
+    // Log the message to console (optional, for debugging)
+    console.log(`${sender}: ${text}`);
 }
 
 /**
@@ -253,11 +235,6 @@ async function startConversation() {
         // Set up audio analyzer for microphone visualization
         await setupAudioAnalyzer();
         
-        // Add welcome message
-        setTimeout(() => {
-            addChatMessage("Hello! I'm your AI assistant. How can I help you today?", 'ai');
-        }, 1000);
-        
         // Start the conversation
         conversation = await Conversation.startSession({
             agentId: 'HD9tfBY7gnrQiM2nEMp5', // Replace with your actual agent ID
@@ -297,12 +274,12 @@ async function startConversation() {
                 agentStatus.textContent = mode.mode === 'speaking' ? 'Speaking' : 'Listening';
             },
             onNewMessage: (message) => {
-                // Add AI message to chat
-                addChatMessage(message.text, 'ai');
+                // Track AI message internally but don't display
+                trackChatMessage(message.text, 'ai');
             },
             onUserMessageCaptured: (message) => {
-                // Add user message to chat
-                addChatMessage(message.text, 'user');
+                // Track user message internally but don't display
+                trackChatMessage(message.text, 'user');
             }
         });
     } catch (error) {
@@ -439,11 +416,6 @@ async function startConversationWithSignedUrl() {
         // Set up audio analyzer for microphone visualization
         await setupAudioAnalyzer();
         
-        // Add welcome message
-        setTimeout(() => {
-            addChatMessage("Hello! I'm your AI assistant. How can I help you today?", 'ai');
-        }, 1000);
-        
         // Get signed URL from your backend
         const signedUrl = await getSignedUrl();
         
@@ -486,12 +458,12 @@ async function startConversationWithSignedUrl() {
                 agentStatus.textContent = mode.mode === 'speaking' ? 'Speaking' : 'Listening';
             },
             onNewMessage: (message) => {
-                // Add AI message to chat
-                addChatMessage(message.text, 'ai');
+                // Track AI message internally but don't display
+                trackChatMessage(message.text, 'ai');
             },
             onUserMessageCaptured: (message) => {
-                // Add user message to chat
-                addChatMessage(message.text, 'user');
+                // Track user message internally but don't display
+                trackChatMessage(message.text, 'user');
             }
         });
     } catch (error) {

@@ -1,0 +1,20 @@
+{
+    "name": "elevenlabs-conversational-ai",
+    "version": "1.0.0",
+    "description": "Web application for ElevenLabs AI agent voice conversations",
+    "scripts": {
+      "dev:frontend": "vite",
+      "dev:backend": "node server.js",
+      "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\""
+    },
+    "dependencies": {
+      "@11labs/client": "latest",
+      "cors": "^2.8.5",
+      "dotenv": "^16.0.3",
+      "express": "^4.18.2"
+    },
+    "devDependencies": {
+      "concurrently": "^8.0.1",
+      "vite": "^4.3.9"
+    }
+  }

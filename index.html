@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ElevenLabs Conversational AI</title>
+        <style>
+            :root {
+                --primary-color: #4361ee;
+                --secondary-color: #3a0ca3;
+                --accent-color: #4cc9f0;
+                --background-color: #f8f9fa;
+                --text-color: #212529;
+                --light-gray: #e9ecef;
+                --user-message-color: #e6f7ff;
+                --ai-message-color: #f0f7ff;
+                --error-color: #e63946;
+                --success-color: #57cc99;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                color: var(--text-color);
+                background-color: var(--background-color);
+                padding: 20px;
+                max-width: 900px;
+                margin: 0 auto;
+                line-height: 1.6;
+            }
+
+            .app-container {
+                display: grid;
+                grid-template-rows: auto 1fr auto;
+                gap: 20px;
+                height: 90vh;
+            }
+
+            .header {
+                text-align: center;
+                padding: 15px;
+                background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+                color: white;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .header h1 {
+                margin: 0;
+                font-size: 28px;
+            }
+
+            .main-content {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 20px;
+                height: 100%;
+            }
+
+            .chat-container {
+                background-color: white;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+
+            .chat-history {
+                flex-grow: 1;
+                overflow-y: auto;
+                padding: 10px;
+                margin-bottom: 15px;
+                background-color: var(--light-gray);
+                border-radius: 8px;
+            }
+
+            .message {
+                margin-bottom: 15px;
+                padding: 12px;
+                border-radius: 8px;
+                max-width: 80%;
+                word-wrap: break-word;
+                position: relative;
+                animation: fadeIn 0.3s ease-in-out;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            .user-message {
+                background-color: var(--user-message-color);
+                margin-left: auto;
+                border-bottom-right-radius: 0;
+                border-left: 3px solid var(--primary-color);
+            }
+
+            .ai-message {
+                background-color: var(--ai-message-color);
+                margin-right: auto;
+                border-bottom-left-radius: 0;
+                border-right: 3px solid var(--secondary-color);
+            }
+
+            .message-timestamp {
+                font-size: 11px;
+                color: #6c757d;
+                text-align: right;
+                margin-top: 5px;
+            }
+
+            .control-panel {
+                background-color: white;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .status-section {
+                margin-bottom: 25px;
+            }
+
+            .status-title {
+                font-weight: bold;
+                font-size: 16px;
+                margin-bottom: 10px;
+                color: var(--secondary-color);
+            }
+
+            .status-indicator {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+
+            .status-label {
+                width: 120px;
+                font-size: 14px;
+            }
+
+            .status-value {
+                font-weight: bold;
+                margin-left: 10px;
+            }
+
+            .indicator-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                margin-right: 8px;
+                display: inline-block;
+            }
+
+            .dot-connected {
+                background-color: var(--success-color);
+                box-shadow: 0 0 0 rgba(87, 204, 153, 0.4);
+                animation: pulse 2s infinite;
+            }
+
+            .dot-disconnected {
+                background-color: #adb5bd;
+            }
+
+            .dot-error {
+                background-color: var(--error-color);
+            }
+
+            .voice-activity {
+                height: 40px;
+                background-color: var(--light-gray);
+                border-radius: 5px;
+                margin-bottom: 20px;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .activity-bars {
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                height: 100%;
+                width: 100%;
+                padding: 0 5px;
+            }
+
+            .activity-bar {
+                background-color: var(--accent-color);
+                width: 4px;
+                margin: 0 2px;
+                border-radius: 2px;
+                height: 5px;
+                transition: height 0.1s ease;
+            }
+
+            .user-speaking .activity-bar {
+                background-color: var(--primary-color);
+            }
+
+            .ai-speaking .activity-bar {
+                background-color: var(--secondary-color);
+            }
+
+            .buttons-container {
+                margin-top: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            button {
+                padding: 12px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: bold;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            button:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            button:active:not(:disabled) {
+                transform: translateY(0);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            #startButton {
+                background-color: var(--primary-color);
+                color: white;
+            }
+
+            #stopButton {
+                background-color: var(--error-color);
+                color: white;
+            }
+
+            #retryButton {
+                background-color: var(--accent-color);
+                color: white;
+            }
+
+            button:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+            .error-toast {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: var(--error-color);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 5px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                z-index: 1000;
+                display: none;
+                animation: slideIn 0.3s ease-out forwards;
+            }
+
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+
+            @keyframes pulse {
+                0% { box-shadow: 0 0 0 0 rgba(87, 204, 153, 0.4); }
+                70% { box-shadow: 0 0 0 10px rgba(87, 204, 153, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(87, 204, 153, 0); }
+            }
+
+            .theme-controls {
+                margin-top: 20px;
+                padding-top: 15px;
+                border-top: 1px solid var(--light-gray);
+            }
+
+            .theme-controls label {
+                display: block;
+                margin-bottom: 10px;
+                font-size: 14px;
+            }
+
+            .theme-controls input {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+
+            @media (max-width: 768px) {
+                .main-content {
+                    grid-template-columns: 1fr;
+                }
+                
+                .app-container {
+                    height: auto;
+                }
+                
+                .chat-container, .control-panel {
+                    height: 400px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="app-container">
+            <div class="header">
+                <h1>ElevenLabs Conversational AI</h1>
+            </div>
+            
+            <div class="main-content">
+                <div class="chat-container">
+                    <div class="chat-history" id="chatHistory">
+                        <!-- Chat messages will appear here -->
+                    </div>
+                </div>
+                
+                <div class="control-panel">
+                    <div class="status-section">
+                        <div class="status-title">Connection Status</div>
+                        <div class="status-indicator">
+                            <span class="indicator-dot dot-disconnected" id="connectionDot"></span>
+                            <span class="status-label">Connection:</span>
+                            <span class="status-value" id="connectionStatus">Disconnected</span>
+                        </div>
+                        <div class="status-indicator">
+                            <span class="status-label">Agent Status:</span>
+                            <span class="status-value" id="agentStatus">Waiting</span>
+                        </div>
+                    </div>
+                    
+                    <div class="voice-activity" id="voiceActivity">
+                        <div class="activity-bars" id="activityBars">
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                            <div class="activity-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="buttons-container">
+                        <button id="startButton">Start Conversation</button>
+                        <button id="stopButton" disabled>Stop Conversation</button>
+                        <button id="retryButton" disabled>Retry Connection</button>
+                    </div>
+                    
+                    <div class="theme-controls">
+                        <div class="status-title">Customize Theme</div>
+                        <label for="primaryColor">Primary Color:</label>
+                        <input type="color" id="primaryColor" value="#4361ee">
+                        
+                        <label for="secondaryColor">Secondary Color:</label>
+                        <input type="color" id="secondaryColor" value="#3a0ca3">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="error-toast" id="errorToast"></div>
+        
+        <script type="module" src="./script.js"></script>
+    </body>
+</html>
